@@ -1,0 +1,38 @@
+{
+	"name": "Rust",
+	"build": {
+		"dockerfile": "Dockerfile",
+		"args": {
+			"VARIANT": "bullseye"
+		}
+	},
+	"runArgs": [
+		"--init",
+		"--cap-add=SYS_PTRACE",
+		"--security-opt",
+		"seccomp=unconfined"
+	],
+	"settings": {
+		"lldb.executable": "/usr/bin/lldb",
+		"files.watcherExclude": {
+			"**/target/**": true
+		},
+		"rust-analyzer.checkOnSave.command": "clippy"
+	},
+	"extensions": [
+		"vadimcn.vscode-lldb",
+		"mutantdino.resourcemonitor",
+		"matklad.rust-analyzer",
+		"hbenl.vscode-test-explorer",
+		"swellaby.vscode-rust-test-adapter",
+		"tamasfe.even-better-toml",
+		"serayuzgur.crates",
+		"gruntfuggly.todo-tree",
+		"ryanluker.vscode-coverage-gutters",
+		"yzhang.markdown-all-in-one"
+	],
+	"mounts": [
+		"source=${localEnv:USERPROFILE}/.gitconfig,target=/root/.gitconfig,type=bind,consistency=cached"
+	  ],
+	"postCreateCommand": "sudo rm -rf target && ln -s /workspaces/target target && mkdir -p out ",
+}
