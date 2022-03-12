@@ -5,6 +5,21 @@ edition = "2021"
 
 [lib]
 name = "semver_calc"
+
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+git2 = "0.14"
+thiserror = "1"
+regex = "1"
+log = "0.4"
+simple_logger = "2"
+semver = "1"
+# demonstrate = "0.4.5"
+
+
+[dev-dependencies]
+# goldenfile = "1.1.0"
+tempfile = "3"
+test-context = "0.1"
+env_logger = "0.9"
