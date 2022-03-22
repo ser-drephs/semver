@@ -63,7 +63,7 @@
         {
             "label": "Publish (Windows)",
             "type": "shell",
-            "command": "cargo build --release --target x86_64-pc-windows-gnu --target-dir out",
+            "command": "cargo build --release --target x86_64-pc-windows-gnu",
             "problemMatcher": [
                 "$rustc"
             ]
@@ -71,7 +71,7 @@
         {
             "label": "Publish (Linux)",
             "type": "shell",
-            "command": "cargo build --release --target x86_64-unknown-linux-gnu --target-dir out",
+            "command": "cargo build --release --target x86_64-unknown-linux-gnu",
             "problemMatcher": [
                 "$rustc"
             ]
