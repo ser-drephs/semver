@@ -4,10 +4,10 @@ use semver::Version;
 
 #[derive(Clone, Debug)]
 pub struct Semantic {
-    major: bool,
-    minor: bool,
-    patch: bool,
-    semver: Version,
+    pub major: bool,
+    pub minor: bool,
+    pub patch: bool,
+    pub version: Version,
 }
 
 impl Default for Semantic {
@@ -16,7 +16,7 @@ impl Default for Semantic {
             major: false,
             minor: false,
             patch: false,
-            semver: Version::new(0, 0, 0),
+            version: Version::new(0, 0, 0),
         }
     }
 }
@@ -26,36 +26,6 @@ impl Semantic {
         Builder {
             semantic: Default::default(),
         }
-    }
-
-    fn new_major(&mut self) -> &mut Self {
-        log::trace!("New major release.");
-        self.major = true;
-        self
-    }
-
-    fn new_minor(&mut self) -> &mut Self {
-        log::trace!("New minor release.");
-        self.minor = true;
-        self
-    }
-
-    fn new_patch(&mut self) -> &mut Self {
-        log::trace!("New patch release.");
-        self.patch = true;
-        self
-    }
-
-    pub fn is_major(&self) -> bool {
-        self.major
-    }
-
-    pub fn is_minor(&self) -> bool {
-        self.minor
-    }
-
-    pub fn is_patch(&self) -> bool {
-        self.patch
     }
 }
 
@@ -85,29 +55,30 @@ impl Builder {
         re.is_match(message)
     }
 
-    fn message_contains_semantic_information(&mut self, message: &str) -> &Self {
+    fn message_contains_semantic_information(&mut self, message: &str) -> &mut Self {
         if self.semantic_major(message) {
-            // self.new_major();
-            self.semantic.new_major();
+            log::trace!("New major release.");
+            self.semantic.major = true;
         } else if self.semantic_minor(message) {
-            // self.semantic =
-            self.semantic.new_minor();
+            log::trace!("New minor release.");
+            self.semantic.minor = true;
         } else if self.semantic_patch(message) {
-            // self.semantic =
-            self.semantic.new_patch();
+            log::trace!("New patch release.");
+            self.semantic.patch = true;
         } else {
             log::trace!("No valuable semantic information from commit message.");
         }
         self
     }
 
-    pub fn is_major(&self) -> bool {
-        self.semantic.is_major()
+    pub fn has_major_release(&self) -> bool {
+        self.semantic.major
     }
 
-    pub fn analyze_commit(&mut self, commit: Commit<'_>) -> &Self {
+    pub fn analyze_commit(&mut self, commit: Commit<'_>) -> &mut Self {
         match commit.message_raw() {
             Some(message) => {
+                log::debug!("Check commit for semantic information: {:?}", message);
                 self.message_contains_semantic_information(message);
             }
             None => {
@@ -137,9 +108,9 @@ mod tests {
                 let semantic = Semantic::builder()
                     .message_contains_semantic_information("feat!: sample commit message")
                     .build();
-                assert!(semantic.is_major());
-                assert!(!semantic.is_minor());
-                assert!(!semantic.is_patch());
+                assert!(semantic.major);
+                assert!(!semantic.minor);
+                assert!(!semantic.patch);
             }
 
             #[test]
@@ -147,9 +118,9 @@ mod tests {
                 let semantic = Semantic::builder()
                     .message_contains_semantic_information("refactor!: sample commit message")
                     .build();
-                assert!(semantic.is_major());
-                assert!(!semantic.is_minor());
-                assert!(!semantic.is_patch());
+                assert!(semantic.major);
+                assert!(!semantic.minor);
+                assert!(!semantic.patch);
             }
 
             #[test]
@@ -157,9 +128,9 @@ mod tests {
                 let semantic = Semantic::builder()
                     .message_contains_semantic_information("feat(scope)!: sample commit message")
                     .build();
-                assert!(semantic.is_major());
-                assert!(!semantic.is_minor());
-                assert!(!semantic.is_patch());
+                assert!(semantic.major);
+                assert!(!semantic.minor);
+                assert!(!semantic.patch);
             }
         }
 
@@ -171,9 +142,9 @@ mod tests {
                 let semantic = Semantic::builder()
                     .message_contains_semantic_information("feat: sample commit message")
                     .build();
-                assert!(!semantic.is_major());
-                assert!(semantic.is_minor());
-                assert!(!semantic.is_patch());
+                assert!(!semantic.major);
+                assert!(semantic.minor);
+                assert!(!semantic.patch);
             }
 
             #[test]
@@ -181,9 +152,9 @@ mod tests {
                 let semantic = Semantic::builder()
                     .message_contains_semantic_information("feat(scope): sample commit message")
                     .build();
-                assert!(!semantic.is_major());
-                assert!(semantic.is_minor());
-                assert!(!semantic.is_patch());
+                assert!(!semantic.major);
+                assert!(semantic.minor);
+                assert!(!semantic.patch);
             }
         }
 
@@ -195,9 +166,9 @@ mod tests {
                 let semantic = Semantic::builder()
                     .message_contains_semantic_information("fix: sample commit message")
                     .build();
-                assert!(!semantic.is_major());
-                assert!(!semantic.is_minor());
-                assert!(semantic.is_patch());
+                assert!(!semantic.major);
+                assert!(!semantic.minor);
+                assert!(semantic.patch);
             }
 
             #[test]
@@ -205,9 +176,9 @@ mod tests {
                 let semantic = Semantic::builder()
                     .message_contains_semantic_information("fix(scope): sample commit message")
                     .build();
-                assert!(!semantic.is_major());
-                assert!(!semantic.is_minor());
-                assert!(semantic.is_patch());
+                assert!(!semantic.major);
+                assert!(!semantic.minor);
+                assert!(semantic.patch);
             }
         }
 
@@ -219,9 +190,9 @@ mod tests {
                 let semantic = Semantic::builder()
                     .message_contains_semantic_information("chore: sample commit message")
                     .build();
-                assert!(!semantic.is_major());
-                assert!(!semantic.is_minor());
-                assert!(!semantic.is_patch());
+                assert!(!semantic.major);
+                assert!(!semantic.minor);
+                assert!(!semantic.patch);
             }
 
             #[test]
@@ -229,9 +200,9 @@ mod tests {
                 let semantic = Semantic::builder()
                     .message_contains_semantic_information("chore(scope): sample commit message")
                     .build();
-                assert!(!semantic.is_major());
-                assert!(!semantic.is_minor());
-                assert!(!semantic.is_patch());
+                assert!(!semantic.major);
+                assert!(!semantic.minor);
+                assert!(!semantic.patch);
             }
 
             #[test]
@@ -239,9 +210,9 @@ mod tests {
                 let semantic = Semantic::builder()
                     .message_contains_semantic_information("chore(feat): sample commit message")
                     .build();
-                assert!(!semantic.is_major());
-                assert!(!semantic.is_minor());
-                assert!(!semantic.is_patch());
+                assert!(!semantic.major);
+                assert!(!semantic.minor);
+                assert!(!semantic.patch);
             }
         }
 
@@ -253,9 +224,9 @@ mod tests {
                 let semantic = Semantic::builder()
                     .message_contains_semantic_information("feature sample commit message")
                     .build();
-                assert!(!semantic.is_major());
-                assert!(!semantic.is_minor());
-                assert!(!semantic.is_patch());
+                assert!(!semantic.major);
+                assert!(!semantic.minor);
+                assert!(!semantic.patch);
             }
 
             #[test]
@@ -263,9 +234,9 @@ mod tests {
                 let semantic = Semantic::builder()
                     .message_contains_semantic_information("")
                     .build();
-                assert!(!semantic.is_major());
-                assert!(!semantic.is_minor());
-                assert!(!semantic.is_patch());
+                assert!(!semantic.major);
+                assert!(!semantic.minor);
+                assert!(!semantic.patch);
             }
 
             #[test]
@@ -273,9 +244,9 @@ mod tests {
                 let semantic = Semantic::builder()
                     .message_contains_semantic_information("Merge feat: sample commit message")
                     .build();
-                assert!(!semantic.is_major());
-                assert!(!semantic.is_minor());
-                assert!(!semantic.is_patch());
+                assert!(!semantic.major);
+                assert!(!semantic.minor);
+                assert!(!semantic.patch);
             }
 
             #[test]
@@ -285,9 +256,38 @@ mod tests {
                         "Merge feat(scope): sample commit message",
                     )
                     .build();
-                assert!(!semantic.is_major());
-                assert!(!semantic.is_minor());
-                assert!(!semantic.is_patch());
+                assert!(!semantic.major);
+                assert!(!semantic.minor);
+                assert!(!semantic.patch);
+            }
+        }
+        mod multiple_semantic_statements {
+            use super::*;
+
+            #[test]
+            fn with_feat_and_fix_then_both_are_set() {
+                let semantic = Semantic::builder()
+                    .message_contains_semantic_information("feat: sample commit message")
+                    .message_contains_semantic_information("fix: sample commit message")
+                    .build();
+                assert!(!semantic.major);
+                assert!(semantic.minor);
+                assert!(semantic.patch);
+            }
+
+            #[test]
+            fn with_feat_break_feat_and_fix_then_all_are_set() {
+                let semantic = Semantic::builder()
+                    .message_contains_semantic_information("feat!: sample breaking commit message")
+                    .message_contains_semantic_information("feat: sample commit message")
+                    .message_contains_semantic_information("fix: sample commit message")
+                    .build();
+                assert!(semantic.major);
+                assert!(semantic.minor);
+                assert!(semantic.patch);
+            }
+        }
+    }
             }
         }
     }
