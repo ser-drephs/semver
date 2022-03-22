@@ -78,7 +78,7 @@ fn commit_test_file(
 
 /// Todo: add to support cargo
 fn logger() {
-    env::set_var("RUST_LOG", "trace");
+    env::set_var("RUST_LOG", "debug");
     let _ = env_logger::builder().is_test(true).try_init();
 }
 
@@ -114,19 +114,19 @@ mod given_path_is_repository {
     #[test]
     fn when_feat_commit_exists_then_semantic_minor_is_set(ctx: &mut RepositoryContext) {
         let semantic = History::analyze(&ctx.dir, None).unwrap();
-        assert!(!semantic.is_major());
-        assert!(semantic.is_minor());
-        assert!(!semantic.is_patch());
+        assert!(!semantic.major);
+        assert!(semantic.minor);
+        assert!(!semantic.patch);
     }
 
     #[test_context(RepositoryContext)]
     #[test]
-    fn when_fear_and_fix_commit_exists_then_semantic_minor_is_set(ctx: &mut RepositoryContext) {
+    fn when_feat_and_fix_commit_exists_then_semantic_minor_is_set(ctx: &mut RepositoryContext) {
         commit_test_file(&ctx.repo, &PathBuf::from("sample-fix.rs"), "fix: feature").unwrap();
         let semantic = History::analyze(&ctx.dir, None).unwrap();
-        assert!(!semantic.is_major());
-        assert!(semantic.is_minor());
-        assert!(semantic.is_patch());
+        assert!(!semantic.major);
+        assert!(semantic.minor);
+        assert!(semantic.patch);
     }
 }
 

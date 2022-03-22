@@ -27,7 +27,7 @@ impl History {
             let commit = repository.find_commit(commit_id)?;
             builder.analyze_commit(commit);
 
-            if builder.is_major() {
+            if builder.has_major_release() {
                 log::debug!("Commits contain major release. Stop search here.");
                 break;
             }
