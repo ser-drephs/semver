@@ -7,5 +7,9 @@ pub enum SemVerError {
     #[error("git library error")]
     GitError(#[from] git2::Error),
     #[error("general failure")]
-    Error(#[from] std::io::Error)
+    Error(#[from] std::io::Error),
+    #[error("semantic version error")]
+    SemVerError(#[from] semver::Error),
+    #[error("semantic version error: {message:?}")]
+    SemanticError { message: String },
 }
