@@ -1,6 +1,6 @@
 use std::path::Path;
 
-use git2::{Oid, Repository, Worktree};
+use git2::{Oid, Repository, Tag, Worktree};
 
 use crate::{error::SemVerError, semantic::Semantic};
 
@@ -15,12 +15,24 @@ impl History {
         let repository = History::get_repository_from_worktree(Repository::open(&path).unwrap())?;
         let mut revwalk = repository.revwalk()?;
 
+        let mut tag: Option<Tag> = None;
         match since {
-            Some(commit) => revwalk.push(commit)?,
+            Some(commit) => {
+                revwalk.push(commit)?;
+                tag = Some(repository.find_tag(commit)?);
+            }
             None => revwalk.push_head()?,
         };
 
         let mut builder = Semantic::builder();
+
+        builder.is_prerelease(repository.head()?.shorthand().unwrap_or(""));
+
+        if let Some(tag) = tag {
+            if let Some(tag_name) = tag.name(){
+                builder.previous_version(tag_name)?;
+            }
+        }
 
         for commit_id in revwalk {
             let commit_id = commit_id?;
@@ -32,6 +44,8 @@ impl History {
                 break;
             }
         }
+        // todo: set prerelease based on branch and configuration
+        builder.calculate_version();
         Ok(builder.build())
     }
 
