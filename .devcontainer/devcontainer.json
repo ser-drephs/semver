@@ -32,7 +32,6 @@
 		"yzhang.markdown-all-in-one"
 	],
 	"mounts": [
-		"source=${localEnv:USERPROFILE}/.gitconfig,target=/root/.gitconfig,type=bind,consistency=cached"
-	  ],
-	"postCreateCommand": "sudo rm -rf target && ln -s /workspaces/target target && mkdir -p out ",
+		"source=/usr/local/bin/git-config,target=/usr/local/bin/git-config,type=bind,consistency=cached"
+	]
 }
