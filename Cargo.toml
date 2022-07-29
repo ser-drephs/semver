@@ -6,15 +6,21 @@ edition = "2021"
 [lib]
 name = "semver_calc"
 
+[[bin]]
+name = "semver"
+path = "src/bin/semver_cli.rs"
+
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-git2 = "0.14"
+git2 = "0.15"
 thiserror = "1"
 regex = "1"
 log = "0.4"
-simple_logger = "2"
 semver = "1"
+env_logger = "0.9"
+clap = { version = "3.2.15", features = ["derive"] }
+clap-verbosity-flag = "1.0.1"
 # demonstrate = "0.4.5"
 
 
@@ -22,4 +28,3 @@ semver = "1"
 # goldenfile = "1.1.0"
 tempfile = "3"
 test-context = "0.1"
-env_logger = "0.9"
