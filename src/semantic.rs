@@ -1,4 +1,4 @@
-use git2::{Commit, Reference};
+use git2::Commit;
 use regex::Regex;
 use semver::{BuildMetadata, Prerelease, Version};
 
@@ -11,6 +11,12 @@ pub struct Semantic {
     pub patch: bool,
     pub prerelase: bool,
     pub version: Version,
+}
+
+impl ToString for Semantic{
+    fn to_string(&self) -> String {
+        format!("{}", self.version)
+    }
 }
 
 impl Default for Semantic {
@@ -130,9 +136,9 @@ impl Builder {
                 None => {
                     log::warn!(
                         "Could not parse prerelease from: {:?}",
-                        self.semantic.prerelase
+                        self.semantic.version.pre
                     );
-                    Prerelease::new("pre.0").unwrap()
+                    Prerelease::new("pre.1").unwrap()
                 }
             };
         }
@@ -576,7 +582,7 @@ mod tests {
                 assert_eq!(2, semantic.version.major);
                 assert_eq!(0, semantic.version.minor);
                 assert_eq!(0, semantic.version.patch);
-                assert_eq!("pre.0", semantic.version.pre.as_str());
+                assert_eq!("pre.1", semantic.version.pre.as_str());
             }
         }
 

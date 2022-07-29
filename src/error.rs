@@ -12,4 +12,8 @@ pub enum SemVerError {
     SemVerError(#[from] semver::Error),
     #[error("semantic version error: {message:?}")]
     SemanticError { message: String },
+    #[error("repository error: {message:?}")]
+    RepositoryError { message: String },
+    #[error("logger error")]
+    LoggerError(#[from] log::SetLoggerError),
 }
