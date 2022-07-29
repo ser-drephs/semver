@@ -113,7 +113,7 @@ mod given_path_is_repository {
     #[test_context(RepositoryContext)]
     #[test]
     fn when_feat_commit_exists_then_semantic_minor_is_set(ctx: &mut RepositoryContext) {
-        let semantic = History::analyze(&ctx.dir, None).unwrap();
+        let semantic = History::analyze(&ctx.dir, None, None).unwrap();
         assert!(!semantic.major);
         assert!(semantic.minor);
         assert!(!semantic.patch);
@@ -123,7 +123,7 @@ mod given_path_is_repository {
     #[test]
     fn when_feat_and_fix_commit_exists_then_semantic_minor_is_set(ctx: &mut RepositoryContext) {
         commit_test_file(&ctx.repo, &PathBuf::from("sample-fix.rs"), "fix: feature").unwrap();
-        let semantic = History::analyze(&ctx.dir, None).unwrap();
+        let semantic = History::analyze(&ctx.dir, None, None).unwrap();
         assert!(!semantic.major);
         assert!(semantic.minor);
         assert!(semantic.patch);
