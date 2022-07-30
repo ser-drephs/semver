@@ -13,7 +13,7 @@ pub struct Semantic {
     pub version: Version,
 }
 
-impl ToString for Semantic{
+impl ToString for Semantic {
     fn to_string(&self) -> String {
         format!("{}", self.version)
     }
@@ -153,7 +153,11 @@ impl Builder {
     }
 
     pub fn previous_version(&mut self, version: &str) -> Result<&mut Self, SemVerError> {
-        let version = Version::parse(version)?;
+        let version = if version.starts_with('v') {
+            Version::parse(version.get(1..version.len()).unwrap())?
+        } else {
+            Version::parse(version)?
+        };
         self.semantic.version = version;
         Ok(self)
     }
