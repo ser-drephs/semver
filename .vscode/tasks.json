@@ -8,8 +8,7 @@
             "type": "shell",
             "command": "cargo tarpaulin --out 'Lcov'",
             "group": {
-                "kind": "build",
-                "isDefault": true
+                "kind": "build"
             },
             "problemMatcher": [
                 "$rustc"
@@ -20,8 +19,7 @@
             "type": "shell",
             "command": "cargo tarpaulin --out 'Html'",
             "group": {
-                "kind": "build",
-                "isDefault": true
+                "kind": "build"
             },
             "problemMatcher": [
                 "$rustc"
