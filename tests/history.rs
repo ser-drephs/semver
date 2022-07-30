@@ -1,13 +1,14 @@
 use std::{
+    env,
     fs::File,
     io::{BufWriter, Write},
-    path::{Path, PathBuf}, env,
+    path::{Path, PathBuf},
 };
 
 use git2::{Commit, ObjectType, Oid, Repository, Signature};
 use tempfile::{tempdir, TempDir};
 
-use semver_calc::{error::SemVerError, history::History};
+use semver_calc::error::SemVerError;
 use test_context::{test_context, TestContext};
 
 fn find_last_commit(repo: &Repository) -> Result<Commit, git2::Error> {
@@ -66,6 +67,14 @@ fn commit_test_file(
     add_and_commit(repo, path, message)
 }
 
+fn create_tag(
+    repo: &Repository,
+    name: &str,
+    commit: &Commit,
+) -> core::result::Result<Oid, git2::Error> {
+    repo.tag_lightweight(name, commit.as_object(), false)
+}
+
 // fn commit_test_file_to_worktree(
 //     worktree: &Worktree,
 //     path: &Path,
@@ -84,6 +93,8 @@ fn logger() {
 
 #[cfg(test)]
 mod given_path_is_repository {
+    use semver_calc::history::{Analyser, CommitAnalyserPoint, HistoryAnalyser, TagAnalyserPoint};
+
     use super::*;
 
     struct RepositoryContext {
@@ -113,7 +124,13 @@ mod given_path_is_repository {
     #[test_context(RepositoryContext)]
     #[test]
     fn when_feat_commit_exists_then_semantic_minor_is_set(ctx: &mut RepositoryContext) {
-        let semantic = History::analyze(&ctx.dir, None, None).unwrap();
+        let semantic = HistoryAnalyser::run(
+            &ctx.dir,
+            CommitAnalyserPoint {
+                ..Default::default()
+            },
+        )
+        .unwrap();
         assert!(!semantic.major);
         assert!(semantic.minor);
         assert!(!semantic.patch);
@@ -123,10 +140,45 @@ mod given_path_is_repository {
     #[test]
     fn when_feat_and_fix_commit_exists_then_semantic_minor_is_set(ctx: &mut RepositoryContext) {
         commit_test_file(&ctx.repo, &PathBuf::from("sample-fix.rs"), "fix: feature").unwrap();
-        let semantic = History::analyze(&ctx.dir, None, None).unwrap();
+        let semantic = HistoryAnalyser::run(
+            &ctx.dir,
+            CommitAnalyserPoint {
+                ..Default::default()
+            },
+        )
+        .unwrap();
         assert!(!semantic.major);
         assert!(semantic.minor);
         assert!(semantic.patch);
+    }
+
+    #[test_context(RepositoryContext)]
+    #[test]
+    fn when_tag_exists_then_semantic_whatever(ctx: &mut RepositoryContext) {
+        let commit_id =
+            commit_test_file(&ctx.repo, &PathBuf::from("sample-fix.rs"), "fix: feature").unwrap();
+        let commit = &ctx.repo.find_commit(commit_id).unwrap();
+        create_tag(&ctx.repo, "v1.2.3", commit).unwrap();
+        commit_test_file(
+            &ctx.repo,
+            &PathBuf::from("seconf.txt"),
+            "chore: initial commit",
+        )
+        .unwrap();
+        commit_test_file(
+            &ctx.repo,
+            &PathBuf::from("sample2.rs"),
+            "feat: impl feature",
+        )
+        .unwrap();
+        let point = TagAnalyserPoint::new(Some("v1.2.3"), &ctx.repo).unwrap();
+        let semantic =
+            HistoryAnalyser::run(&ctx.dir, point )
+                .unwrap();
+        assert!(!semantic.major);
+        assert!(semantic.minor);
+        assert!(semantic.patch);
+        assert_eq!("1.3.0", semantic.version.to_string())
     }
 }
 
